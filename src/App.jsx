@@ -1,24 +1,56 @@
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
+import './App.css';
 
 export default function App() {
-  const { transcript, listening, resetTranscript, browserSupportsSpeechRecognition } =
-    useSpeechRecognition();
+  const {
+    transcript,
+    listening,
+    resetTranscript,
+    browserSupportsSpeechRecognition,
+    isMicrophoneAvailable,
+  } = useSpeechRecognition();
 
   if (!browserSupportsSpeechRecognition) {
-    return <p>Seu navegador não suporta reconhecimento de voz.</p>;
+    return (
+      <main className="card">
+        <p className="alert">
+          Seu navegador não suporta reconhecimento de voz. Tente no Chrome ou no Edge.
+        </p>
+      </main>
+    );
   }
 
+  const start = () => SpeechRecognition.startListening({ continuous: true, language: 'pt-BR' });
+
   return (
-    <div style={{ padding: 24, display: 'flex', flexDirection: 'column', alignItems: 'center', gap:15 }}>
-      <p>Microfone: {listening ? 'ligado' : 'desligado'}</p>
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16,  justifyContent: 'center' }}>
-      <button onClick={() => SpeechRecognition.startListening({ continuous: true, language: 'pt-BR' })}>
-        Começar
-      </button>
-      <button onClick={SpeechRecognition.stopListening}>Parar</button>
-      <button onClick={resetTranscript}>Limpar</button>
+    <main className="card">
+      <h1>Reconhecimento de voz</h1>
+      <p className="subtitle">Demonstração do pacote react-speech-recognition</p>
+
+      <div className={`status ${listening ? 'on' : ''}`}>
+        <span className="dot" />
+        Microfone {listening ? 'ligado' : 'desligado'}
       </div>
-      <p>{transcript}</p>
-    </div>
+
+      {!isMicrophoneAvailable && (
+        <p className="alert">Permita o acesso ao microfone no navegador para continuar.</p>
+      )}
+
+      <div className="actions">
+        <button className="primary" onClick={start} disabled={listening}>
+          Começar
+        </button>
+        <button onClick={SpeechRecognition.stopListening} disabled={!listening}>
+          Parar
+        </button>
+        <button onClick={resetTranscript} disabled={!transcript}>
+          Limpar
+        </button>
+      </div>
+
+      <div className="transcript">
+        {transcript || <span className="placeholder">Clique em Começar e fale algo…</span>}
+      </div>
+    </main>
   );
 }
